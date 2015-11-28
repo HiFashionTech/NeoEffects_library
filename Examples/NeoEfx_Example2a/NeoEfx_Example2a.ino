@@ -39,6 +39,7 @@ NeoWindow ring2 = NeoWindow(&strip1, RING_2_START, SMALL_NEORING_SIZE);
 NeoWindow ring3 = NeoWindow(&strip1, RING_3_START, SMALL_NEORING_SIZE);
 NeoWindow ring4 = NeoWindow(&strip1, RING_4_START, SMALL_NEORING_SIZE);
 
+
 void setup() {
   // use serial line for debugging output
   Serial.begin(115200);
@@ -68,38 +69,74 @@ void setup() {
   delay(1000);
   
   // Set up initial effects
-  ring1.setWipeEfx(strip1.randomColor(),100 ); // wipe on a random color
-  ring2.setBlinkEfx(strip1.randomColor(), 250, 10); // blink a random color
-  ring3.setCircleEfx(strip1.randomColor(), 200); // run one pixel across window
-  ring4.setFadeEfx(0, strip1.randomColor(), 100, ring4.fadeTypeCycle, 0); // fade between two colors
+  ring1.setWipeEfx(strip1.randomColor(),100 );
+  ring2.setBlinkEfx(strip1.randomColor(), 250, 10);
+  ring3.setCircleEfx(strip1.randomColor(), 200);
+  ring4.setFadeEfx(0, strip1.randomColor(), 100, NeoWindow::fadeTypeJumpBack, 0);
 
 Serial.println("Setup Done");
 }
 
+int ring2State = false;
+
+int ring3State = 0;
 
 void loop() {
-  
-  // grab the current time using the class method. thus it is only called once, regardless of # windows
+    
+  // grab the current time in class method
   NeoWindow::updateTime();
 
-  // here we might check inputs and EffectDone() to change effects
-
-  // Simple wipe completed? chose another random color
+  // check all inputs and update Effects per Window, etc
   if (ring1.effectDone())
       ring1.setWipeEfx(strip1.randomColor(),100 );
-  // completed circle, pick new color
-  if (ring3.effectDone())
-      ring3.setCircleEfx(strip1.randomColor(), 200);
+      
+  if (ring2.effectDone()){
+    if (ring2State)
+    {
+      ring2.setWipeEfx(0,100 );
+      ring2State = false;
+    } else {
+      ring2.setWipeEfx(ourPurple,100 );
+      ring2State = true;
+    }
+  }
+  if (ring3.effectDone()) {
+    switch (ring3State) {
+      case 0:
+        ring3.fillColor(ourPurple);
+        ring3.setHoldEfx(5000);
+        ring3State = 1;
+        break;
+      case 1:
+        ring3.fillBlack();
+        ring3.setHoldEfx(5000);
+        ring3State = 2;
+        break;
+      case 2:
+      default:
+         ring3.setBlinkEfx(ourPurple, 250, 10);
+         ring3State = 0;
+    }
+  }
+  if (ring4.effectDone())
+      ring4.setCircleEfx(strip1.randomColor(), 200);
 
-  // now update each Window - does one 'frame' of effect on the window
-  ring1.updateWindow();
-  ring2.updateWindow();
-  ring3.updateWindow();
-  ring4.updateWindow();
-
-  // if the strip changed, send commands out to it.
-  strip1.show();
+  // now update each Window
+  for (int i=0; i< numRings;i++)
+  {
+      rings[i]->updateWindow();
+  }
   
+//  ring1.updateWindow();
+//  ring2.updateWindow();
+//  ring3.updateWindow();
+//  ring4.updateWindow();
+//  ring5.updateWindow();
+//  ring6.updateWindow();
+//  ring7.updateWindow();
+//  ring8.updateWindow();
+
+  strip1.show();
 //Serial.print("BottomLoop "); Serial.println(millis());
 //  delay(1000); 
 }
