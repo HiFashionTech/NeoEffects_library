@@ -1,5 +1,11 @@
 #import "NeoRainbowEfx.h"
 
+NeoRainbowEfx::NeoRainbowEfx(NeoStrip *strip, int startPixel, int len)
+  : NeoWindow(strip, startPixel, len)
+{
+  
+}
+
 void NeoRainbowEfx:: setRainbowEfx(uint16_t waitTime)
 {
   efxDone = false;

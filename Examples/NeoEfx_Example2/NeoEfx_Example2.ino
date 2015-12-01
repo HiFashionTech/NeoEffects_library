@@ -1,10 +1,12 @@
 // somewhat more elaborate example of the NeoStrip and NeoWindow classes
-//
+// using an array of Windows to simplify updates, 
+// some more complex actions on Effects Done
 
 #include <Adafruit_NeoPixel.h>
-#include "NeoStrip.h"
-#include "NeoWindow.h"
+#include <NeoEffects.h>
 
+// we are using the smaller Adafruit NeoPixel with 12 leds
+// http://www.adafruit.com/products/1643
 #define SMALL_NEORING_SIZE 12
 
 // Pins for strips connected via OctoWS2811
@@ -15,14 +17,12 @@
 // strip moved to pin 1 for shoulder piece
 #define STRIP_1_PIN 1
 
-// 6 rings on shoulder piece
+// 4 rings on shoulder piece
 const int RING_1_START = 0;
 const int RING_2_START = (RING_1_START + SMALL_NEORING_SIZE);
 const int RING_3_START = (RING_2_START + SMALL_NEORING_SIZE);
 const int RING_4_START = (RING_3_START + SMALL_NEORING_SIZE);
-const int RING_5_START = (RING_4_START + SMALL_NEORING_SIZE);
-const int RING_6_START = (RING_5_START + SMALL_NEORING_SIZE);
-const int numRings = 6;
+const int numRings = 4;
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -37,40 +37,32 @@ NeoWindow ring1 = NeoWindow(&strip1, RING_1_START, SMALL_NEORING_SIZE);
 NeoWindow ring2 = NeoWindow(&strip1, RING_2_START, SMALL_NEORING_SIZE);
 NeoWindow ring3 = NeoWindow(&strip1, RING_3_START, SMALL_NEORING_SIZE);
 NeoWindow ring4 = NeoWindow(&strip1, RING_4_START, SMALL_NEORING_SIZE);
-NeoWindow ring5 = NeoWindow(&strip1, RING_5_START, SMALL_NEORING_SIZE);
-NeoWindow ring6 = NeoWindow(&strip1, RING_6_START, SMALL_NEORING_SIZE);
 
-NeoWindow *rings[] = {&ring1, &ring2, &ring3, &ring4, &ring5, &ring6};
+// we create an array of ings (windows) to make updating simpler
+NeoWindow *rings[] = {&ring1, &ring2, &ring3, &ring4 };
 
-int anoukRed = 128;
-int anoukGreen = 0;
-int anoukBlue = 50;
-
-uint32_t anoukPurple = strip1.Color(128, 0, 50);
-
-uint32_t randomAnouk() 
-{
-  return Adafruit_NeoPixel::Color(random(0,255),0,random(0,255));
-}
+const uint32_t aNicePurple = strip1.Color(128, 0, 50);
 
 void setup() {
+  // use serial line for debugging output
   Serial.begin(115200);
   delay(500); // delay a bit when we start so we can open arduino serial monitor window
   
-  Serial.println("Starting NeoEffects Test");
-  
+  Serial.println("Starting NeoEffects Example2");
+
+  // start the strip.  do this first for all strips
   strip1.begin();
 
- // if dont setBrightness down, we get odd effects.  probably because it draws too much power
+// NeoPixels can be very bright, and at full power can use lots of power
+// longer 'strips' require extra power to run full bright. 
+// brightness runs 0-255 and scales all colors to match that dark->bright
 // strip1.setBrightness(100);
-// strip1.setBrightness(180);
-// strip1.setBrightness(200);
 
- strip1.clearStrip();
- strip1.show();
+ // first we Blink the whole strip to show app is running
+  strip1.clearStrip();
+  strip1.show();
   delay(1000);    
-//  strip1.fillStrip(Adafruit_NeoPixel::Color(255,255,255));
-  strip1.fillStrip(anoukPurple);  //Adafruit_NeoPixel::Color(128,128,128));
+  strip1.fillStrip(Adafruit_NeoPixel::Color(255,255,255));
   strip1.show();
   delay(1000);
   strip1.clearStrip();
@@ -78,27 +70,19 @@ void setup() {
   delay(1000);
   
   // put your setup code here, to run once:
-//  ring1.setWipeEfx(strip1.randomColor(),100 );
-  ring1.setWipeEfx(randomAnouk(),100 );
-  ring2.setWipeEfx(anoukPurple,100 );
-  ring3.setBlinkEfx(anoukPurple, 250, 10);
+  ring1.setWipeEfx(strip1.randomColor(),100 ); // wipe on a random color
+
+  ring2.setWipeEfx(aNicePurple,100 );
+  ring3.setBlinkEfx(aNicePurple, 250, 10);
   
-  ring4.setCircleEfx(randomAnouk(), 200);
-  ring5.setFadeEfx(0, anoukPurple, 100, ring5.fadeTypeJumpBack, 0);
-//  ring5.setCircleEfx(Adafruit_NeoPixel::Color(128, 0, 128), 10);
-  ring6.setSparkleEfx(anoukPurple, 10, 200);
-//  
-//  ring7.setFadeEfx(anoukPurple, strip1.Color(128,128,128), 10, ring7.fadeTypeCycle, 0);
-////  ring7.setFadeEfx(anoukPurple, strip1.White, 10, ring7.fadeTypeCycle, 0);
-////  ring7.setCircleEfx(Adafruit_NeoPixel::Color(0, 128, 128), 500);
-//  ring8.setFadeEfx(0, anoukPurple, 1000, ring8.fadeTypeOnce, 0);
-////  ring8.setCircleEfx(anoukPurple, 50);
+  ring4.setCircleEfx(strip1.randomColor(), 200);
 
 Serial.println("Setup Done");
 }
 
+// Ring 2 will have two states and implement a wipe on/wipe off effect
 int ring2State = false;
-
+// Ring 3 has three states 
 int ring3State = 0;
 
 void loop() {
@@ -107,23 +91,29 @@ void loop() {
   NeoWindow::updateTime();
 
   // check all inputs and update Effects per Window, etc
+  // ring1: wipe with random color
   if (ring1.effectDone())
-      ring1.setWipeEfx(randomAnouk(),100 );
-      
+      ring1.setWipeEfx(strip1.randomColor(),100 );
+
+  // two states: wipe on purple, wipe on black
   if (ring2.effectDone()){
     if (ring2State)
     {
+      // wipe with black
       ring2.setWipeEfx(0,100 );
       ring2State = false;
     } else {
-      ring2.setWipeEfx(anoukPurple,100 );
+      // wipe with purple
+      ring2.setWipeEfx(aNicePurple,100 );
       ring2State = true;
     }
   }
+
+  // 3rd ring has 3 states: effectively On/Off and blinking
   if (ring3.effectDone()) {
     switch (ring3State) {
       case 0:
-        ring3.fillColor(anoukPurple);
+        ring3.fillColor(aNicePurple);
         ring3.setHoldEfx(5000);
         ring3State = 1;
         break;
@@ -134,29 +124,23 @@ void loop() {
         break;
       case 2:
       default:
-         ring3.setBlinkEfx(anoukPurple, 250, 10);
+         ring3.setBlinkEfx(aNicePurple, 250, 10);
          ring3State = 0;
     }
   }
+  // 4th ring, switch to new color
   if (ring4.effectDone())
-      ring4.setCircleEfx(randomAnouk(), 200);
+      ring4.setCircleEfx(strip1.randomColor(), 200);
 
-  // now update each Window
+  // now update each Window, using the array
   for (int i=0; i< numRings;i++)
   {
       rings[i]->updateWindow();
   }
-  
-//  ring1.updateWindow();
-//  ring2.updateWindow();
-//  ring3.updateWindow();
-//  ring4.updateWindow();
-//  ring5.updateWindow();
-//  ring6.updateWindow();
-//  ring7.updateWindow();
-//  ring8.updateWindow();
-
+ 
+  // if the strip changed, send commands out to it.
   strip1.show();
+  
 //Serial.print("BottomLoop "); Serial.println(millis());
 //  delay(1000); 
 }

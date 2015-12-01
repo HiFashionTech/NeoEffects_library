@@ -5,6 +5,13 @@
 #ifndef NEOEFFECTS_LIBRARY
 #define NEOEFFECTS_LIBRARY
 
+#if ARDUINO >= 100
+#include <Arduino.h>
+#else
+#include <WProgram.h>
+#include <pins_arduino.h>
+#endif
+
 // We are based on the Adafruit library: https://github.com/adafruit/Adafruit_NeoPixel
 #include <Adafruit_NeoPixel.h>
 

@@ -4,17 +4,13 @@
 */
 
 #include <Adafruit_NeoPixel.h>
-#include <NeoStrip.h>
-#include <NeoWindow.h>
+#include <NeoEffects.h>
+#include "NeoRainbowEfx.h"
 
 //////////////////////////////////////////
 #define SMALL_NEORING_SIZE 12
-// pin number changes far too often.
-// Lei using teensy3.0 on sheild board uses pin2
-// Lei is on pin 3, shoulders on pin1 
+
 #define STRIP_1_PIN 2
-//#define STRIP_1_PIN 3
-//#define STRIP_1_PIN 1
 
 const int RING_1_START = 0;
 const int RING_2_START = (RING_1_START + SMALL_NEORING_SIZE);
@@ -32,57 +28,34 @@ const int numRings = 4;
 
 NeoStrip strip1 = NeoStrip(SMALL_NEORING_SIZE * numRings, STRIP_1_PIN, NEO_GRB + NEO_KHZ800);
 
-NeoWindow ring1 = NeoWindow(&strip1, RING_1_START, SMALL_NEORING_SIZE);
-NeoWindow ring2 = NeoWindow(&strip1, RING_2_START, SMALL_NEORING_SIZE);
-NeoWindow ring3 = NeoWindow(&strip1, RING_3_START, SMALL_NEORING_SIZE);
-NeoWindow ring4 = NeoWindow(&strip1, RING_4_START, SMALL_NEORING_SIZE);
-NeoWindow allPixels = NeoWindow(&strip1, RING_1_START, strip1.numPixels());
+// first ring is same as BasicUse example
+NeoWindow     ring1 = NeoWindow(&strip1, RING_1_START, SMALL_NEORING_SIZE);
+// ring2 is subclass of Windows
+NeoRainbowEfx ring2 = NeoRainbowEfx(&strip1, RING_2_START, SMALL_NEORING_SIZE);
 
-NeoWindow *rings[] = {&ring1, &ring2, &ring3, &ring4 };
-
-//////////////////////////////////////////
-const int anoukRed = 128;
-const int anoukGreen = 0;
-const int anoukBlue = 50;
-
-const uint32_t anoukPurple = strip1.Color(anoukRed, anoukGreen, anoukBlue);
-
-uint32_t randomAnouk() 
-{
-  return Adafruit_NeoPixel::Color(random(10,200),0,random(10,100));
-}
+const uint32_t aNicePurple = strip1.Color(128, 0, 50);
 
 //////////////////////////////////////////
 void setup() {
 
-  //Open up a serial connection
+   // use serial line for debugging output
   Serial.begin(115200);
-  //Wait for the serial connection
-  delay(500);
+  delay(500); // delay a bit when we start so we can open arduino serial monitor window
+  
+  Serial.println("Starting NeoEffects Example2");
 
-Serial.println("Virtual Hug Lei App");
-
+  // start the strip.  do this first for all strips
   strip1.begin();
-  strip1.setBrightness(100);
+
+// NeoPixels can be very bright, and at full power can use lots of power
+// longer 'strips' require extra power to run full bright. 
+// brightness runs 0-255 and scales all colors to match that dark->bright
+// strip1.setBrightness(100);
 
   blinkWholeStrip();
 
-  setSocialEffect();
-
-//  ring1.setWipeEfx(randomAnouk(),100 );
-
-//  strip1.show();
-
-Serial.println("Virtual Hug Lei App start loop");
-  allPixels.printData();
-    int range = sonar.readCM();
-  int zone = findZone(range);
-  Serial.print("Range CM is: "); Serial.print(range);
-  Serial.print(" Zone is: "); Serial.print(zone);
-  Serial.println();
-Serial.println("Virtual Hug Lei App wait long time");
-  delay(2000);
-  Serial.println("OK GO");
+  ring1.setWipeEfx(strip1.randomColor(),100 ); // wipe on a random color
+  ring2.setRainbowEfx( 100 );
 
 }
 
@@ -91,100 +64,15 @@ void loop() {
   // grab the current time in class method
   NeoWindow::updateTime();
 
-  int range = sonar.readCM();
-  int zone = findZone(range);
-//  Serial.print("Range CM is: "); Serial.print(range);
-//  Serial.print(" Zone is: "); Serial.print(zone);
-//  Serial.println();
+  // Simple wipe completed? chose another random color
+  if (ring1.effectDone())
+    ring1.setWipeEfx(strip1.randomColor(),100 );
 
-  if (zone != lastZone) {
-    Serial.print(" Change Zone from ");Serial.print(lastZone);Serial.print(" toZone:");Serial.println(zone);
-    lastZone = zone;
-    switch (zone) {
-      case IntimateZone:
-        setIntimateEffect();
-        break;
-      case PersonalZone:
-        setPersonalEffect();
-        break;
-      default:
-        setSocialEffect();
-        break;
-    }
-  }
-  
-  // now update each Window
-  for (int i=0; i < numRings;i++)
-  {
-      rings[i]->updateWindow();
-      if (rings[i]->effectDone()) {
-        if (zone == PersonalZone)
-          resetPersonalEfx();
-      }
-  }
-
-  allPixels.updateWindow();
+    // now update each Window - does one 'frame' of effect on the window
+  ring1.updateWindow();
+  ring2.updateWindow();
 
   strip1.show();
-}
-
-//
-void setSocialEffect()
-{
-  Serial.println("Set Social Effect");
-  // twinkle 20% of pixels
-  allPixels.fillBlack();
-  allPixels.setMultiSparkleEfx(anoukPurple, 500, 200, numPixelsInSocial);
-  for (int i=0; i < numRings;i++)
-  {
-      rings[i]->setNoEfx();
-  }
-
-}
-
-void resetPersonalEfx()
-{
-    allPixels.setNoEfx();
-//    allPixels.fillBlack();
-  for (int i=0; i < numRings;i++)
-  {
-      rings[i]->setCircleEfx(NeoStrip::randomColor(0, Adafruit_NeoPixel::Color(255,20,255)), 1 );
-      
-//      rings[i]->setRandomWipeEfx(0, strip1.randomColor(), 10 );
-//      rings[i]->setRandomWipeEfx(0, randomAnouk(), 10 );
-  }  
-
-}
-
-void setPersonalEffect()
-{
-    Serial.println("Set Personal Effect");
-
-  resetPersonalEfx();
-  
-  // set spirals
-//  allPixels.setNoEfx();
-////  allPixels.fillBlack();
-//  for (int i=0; i < numRings;i++)
-//  {
-//      rings[i]->setCircleEfx(Adafruit_NeoPixel::Color(255,20,255), 2 );
-////      rings[i]->setRandomWipeEfx(0, Adafruit_NeoPixel::Color(255,20,255), 2 );
-////      rings[i]->setRandomWipeEfx(0, strip1.randomColor(), 10 );
-////      rings[i]->setRandomWipeEfx(0, randomAnouk(), 10 );
-//  }  
-}
-
-void setIntimateEffect()
-{
-  Serial.println("Set Intimate Effect");
-  allPixels.fillBlack();
-  allPixels.setNoEfx();
-  // slowFadeInOut
-  for (int i=0; i < numRings;i++)
-  {
-      rings[i]->setFadeEfx(0, anoukPurple, 10, NeoWindow::fadeTypeCycle, 0);
-
-  }
 }
 
 
@@ -193,7 +81,7 @@ void blinkWholeStrip(void)
   strip1.clearStrip();
   strip1.show();
   delay(1000);    
-  strip1.fillStrip(anoukPurple);
+  strip1.fillStrip(aNicePurple);
   strip1.show();
   delay(1000);
   strip1.clearStrip();

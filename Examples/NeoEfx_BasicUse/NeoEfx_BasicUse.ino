@@ -3,8 +3,7 @@
 //
 
 #include <Adafruit_NeoPixel.h>
-#include <NeoStrip.h>
-#include <NeoWindow.h>
+#include <NeoEffects.h>
 
 // we are using the smaller Adafruit NeoPixel with 12 leds
 // http://www.adafruit.com/products/1643
@@ -53,10 +52,8 @@ void setup() {
 // longer 'strips' require extra power to run full bright. 
 // brightness runs 0-255 and scales all colors to match that dark->bright
 // strip1.setBrightness(100);
-// strip1.setBrightness(180);
-// strip1.setBrightness(200);
 
- // frist we Blink the whole strip to show app is running
+ // first we Blink the whole strip to show app is running
   strip1.clearStrip();
   strip1.show();
   delay(1000);    
@@ -67,7 +64,7 @@ void setup() {
   strip1.show();
   delay(1000);
   
-  // Set up initial effects
+  // Now set up effects to run on each of 4 rings
   ring1.setWipeEfx(strip1.randomColor(),100 ); // wipe on a random color
   ring2.setBlinkEfx(strip1.randomColor(), 250, 10); // blink a random color
   ring3.setCircleEfx(strip1.randomColor(), 200); // run one pixel across window
@@ -78,6 +75,11 @@ Serial.println("Setup Done");
 
 
 void loop() {
+  // Basic NeoEffects loop:
+  // update time
+  // check inputs & effectsDone - change behavior as needed
+  // update each active Window
+  // show the strips
   
   // grab the current time using the class method. thus it is only called once, regardless of # windows
   NeoWindow::updateTime();
