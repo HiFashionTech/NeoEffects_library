@@ -10,7 +10,7 @@
 #include <AdaFruit_NeoPixel.h>
 
 // and our NeoStrip object that encapsulates the Pixel
-#include "NeoStrip.h"
+#include <NeoStrip.h>
 
 class NeoWindow 
 {
