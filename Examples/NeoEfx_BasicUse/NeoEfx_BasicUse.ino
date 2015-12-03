@@ -9,13 +9,8 @@
 // http://www.adafruit.com/products/1643
 #define SMALL_NEORING_SIZE 12
 
-// Pins for strips connected via OctoWS2811
-// these are assigned to odd ordering of pins for reasons internal to Octo library
-// although we are not using the library, we may use the Octo interface board 
-// which provides access to these pins via 2 RJ45 connectors.
-//#define STRIP_1_PIN 2
-// strip moved to pin 1 for shoulder piece
-#define STRIP_1_PIN 1
+// Strip is connected to Arduino Pin 1 
+#define STRIP_PIN 1
 
 // 4 rings on shoulder piece
 const int RING_1_START = 0;
@@ -31,7 +26,7 @@ const int numRings = 4;
 //   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-NeoStrip strip1 = NeoStrip(SMALL_NEORING_SIZE * numRings, STRIP_1_PIN, NEO_GRB + NEO_KHZ800);
+NeoStrip strip1 = NeoStrip(SMALL_NEORING_SIZE * numRings, STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 NeoWindow ring1 = NeoWindow(&strip1, RING_1_START, SMALL_NEORING_SIZE);
 NeoWindow ring2 = NeoWindow(&strip1, RING_2_START, SMALL_NEORING_SIZE);
