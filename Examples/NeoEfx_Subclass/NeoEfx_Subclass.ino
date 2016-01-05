@@ -8,15 +8,14 @@
 #include "NeoRainbowEfx.h"
 
 //////////////////////////////////////////
-#define SMALL_NEORING_SIZE 16
+#define NEORING_SIZE 16
 
 #define STRIP_1_PIN 2
 
 const int RING_1_START = 0;
-const int RING_2_START = (RING_1_START + SMALL_NEORING_SIZE);
-const int RING_3_START = (RING_2_START + SMALL_NEORING_SIZE);
-const int RING_4_START = (RING_3_START + SMALL_NEORING_SIZE);
-const int numRings = 4;
+const int RING_2_START = (RING_1_START + NEORING_SIZE);
+const int RING_3_START = (RING_2_START + NEORING_SIZE);
+const int numRings = 3;
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -26,12 +25,12 @@ const int numRings = 4;
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 
-NeoStrip strip1 = NeoStrip(SMALL_NEORING_SIZE * numRings, STRIP_1_PIN, NEO_GRB + NEO_KHZ800);
+NeoStrip strip1 = NeoStrip(NEORING_SIZE * numRings, STRIP_1_PIN, NEO_GRB + NEO_KHZ800);
 
 // first ring is same as BasicUse example
-NeoWindow     ring1 = NeoWindow(&strip1, RING_1_START, SMALL_NEORING_SIZE);
-// ring2 is subclass of Windows
-NeoRainbowEfx ring2 = NeoRainbowEfx(&strip1, RING_2_START, SMALL_NEORING_SIZE);
+NeoRainbowEfx ring1 = NeoRainbowEfx(&strip1, RING_1_START, NEORING_SIZE);
+NeoRainbowEfx ring2 = NeoRainbowEfx(&strip1, RING_2_START, NEORING_SIZE);
+NeoWindow     ring3 = NeoWindow(&strip1, RING_3_START, NEORING_SIZE);
 
 const uint32_t aNicePurple = strip1.Color(128, 0, 50);
 
@@ -54,9 +53,10 @@ void setup() {
 
   blinkWholeStrip();
 
-  ring1.setWipeEfx(strip1.randomColor(),100 ); // wipe on a random color
-  ring2.setRainbowEfx( 100, 0 );
-
+  ring1.setRainbowEfx( 100, 0 );
+  ring2.setWipeEfx(strip1.randomColor(),100 ); // wipe on a random color
+  ring3.setFadeEfx(0, aNicePurple, 100, ring1.fadeTypeCycle, 0); // fade between two colors
+Serial.println("Begin Loop");
 }
 
 int stateOne = 0;  // update to change ring1 effects
@@ -65,47 +65,52 @@ int stateTwo = 0;
 void loop() {
   // grab the current time in class method
   NeoWindow::updateTime();
-
-  // Simple wipe completed? chose another random color
+  
   if (ring1.effectDone()) {
-    stateOne++;
-    switch (stateOne) {
-      case 1:
-        Serial.println("Ring1 Sparkle");
-        ring1.setSparkleEfx(strip1.randomColor(),  50,  50, 100);
-        break;
-      case 2:
-        Serial.println("Ring1 Fade");
-        ring1.setFadeEfx(0, strip1.randomColor(), 100, ring1.fadeTypeCycle, 0); // fade between two colors
-        break;
-      case 3:
-        Serial.println("Ring1 Circle");
-        ring1.setCircleEfx(strip1.randomColor(), 200);
-        break;
-     default:
-        Serial.println("Ring1 WipeEfx");
-        stateOne = 0;
-        ring1.setWipeEfx(strip1.randomColor(),100 );
-    }
-  }
-  if (ring2.effectDone()) {
-    if (stateTwo == 0) { 
-      ring2.setRainbowEfx( 100, 1 );
-      stateTwo = 1;
+    if (stateOne == 0) { 
+      ring1.setRainbowEfx( 100, 1 );
+      stateOne = 1;
     } else {
-      ring2.setRainbowEfx( 100, 0 );
-      stateTwo = 0;
+      ring1.setRainbowEfx( 100, 0 );
+      stateOne = 0;
     }
-  Serial.print("Rainbow State ");Serial.println(stateTwo);
   }
   
-  if (ring2.getEffectCount() > 10) {
-    ring2.setRainbowEfx( 100, 1 );
+  // ring2 state machine
+  if (ring2.effectDone()) {
+    stateTwo++;
+    Serial.print("Ring2 state:");Serial.print(stateTwo);
+    switch (stateTwo) {
+      case 1:
+        Serial.println(" Sparkle");
+        ring2.setSparkleEfx(strip1.randomColor(),  50,  50, 100);
+        break;
+      case 2:
+        Serial.println(" Fade");
+        ring2.setFadeEfx(0, strip1.randomColor(), 10, ring1.fadeTypeCycle, 0); // fade between two colors
+        break;
+      case 3:
+        Serial.println(" Circle");
+        ring2.setCircleEfx(strip1.randomColor(), 200);
+        break;
+     case 4:
+        Serial.println(" Blink");
+        ring2.setBlinkEfx(aNicePurple, 250, 10);
+        break;
+     case 5:
+        Serial.println(" MultiSparkle");
+        ring2.setMultiSparkleEfx(aNicePurple, 250, 100,NEORING_SIZE/4,20);
+        break;
+     default:
+        Serial.println(" WipeEfx");
+        stateTwo = 0;
+        ring2.setWipeEfx(strip1.randomColor(),100 );
+    }
   }
-
     // now update each Window - does one 'frame' of effect on the window
   ring1.updateWindow();
   ring2.updateWindow();
+  ring3.updateWindow();
 
   strip1.show();
 }

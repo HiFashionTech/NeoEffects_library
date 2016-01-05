@@ -27,7 +27,7 @@ void NeoRainbowEfx:: setRainbowEfx(uint16_t waitTime, int type)
 void NeoRainbowEfx::rainbowEfxUpdate(void)
 {
   // put a color in each pixel of window, depending on type
-  for (int i=0; i <= myPixelCount; i++)
+  for (int i=0; i < myPixelCount; i++)
   {
     // colorWheel has 255 colors, from Adafruit NeoPixel strandtest example
     if (rainbowType == 0) {
