@@ -29,7 +29,7 @@ The programmer uses one of the setXXXEffect() methods to set the current effect 
 ## Effects Defined by NeoWindow
 
 Currently NeoWindow defines the following effects:
-- NoEffect : ignore the window
+- NoEffect : ignore the window; also used to reset internal timers/counters
 - Hold : hold current pixel colors for time period
 - Circle  : one dot of specified color moves across window with time period between changes
 - Wipe  : wipe (fill) window one dot of color at a time, with delay between changes
@@ -120,7 +120,7 @@ The public setXXX() method will initialize the effect variables and set the init
 void NeoRainbowEfx:: setRainbowEfx(uint16_t waitTime)
 {
   // members common to all effects
-  efxDone = false;
+  setNoEfx();// resets common counters, timers etc
   effectDelay = waitTime;
   // effect specfic members
   curColor = 0;
@@ -131,5 +131,31 @@ void NeoRainbowEfx:: setRainbowEfx(uint16_t waitTime)
 
 The effect specific update method does not need to worry about checking the time or marking the strip as changed. Those actions are handled by the updateWindow() method before it invokes the effect specific update.
 
+# State Machines to change effects
+Since we are no longer using a long list of effects and delay() in the loop(), we need an alternative way to control our system.
 
+[State Machines](https://en.wikipedia.org/wiki/Finite-state_machine), aka finite state machines, is a programming technique that uses States and Transitions.  A simple state machine could test the value (state) of a LED_STATE variable and if it is on, turn the LED off (and change LED_STATE to off), and vice versa.  Sparkfun has a nice in-depth blog post about using [a state machine to control an LED](https://www.sparkfun.com/news/1801).
+
+These are quite applicable to our new effects.  The libary's Neo_Effects_Example2 uses a simple state machine to control ring2
+
+```
+// outside and before loop() we define a variable to control the state:
+int ring2State = false;
+
+////// later in loop()
+
+// two states: wipe on purple, wipe on black
+  if (ring2.effectDone()){
+    if (ring2State)
+    {
+      // wipe with black
+      ring2.setWipeEfx(0,100 );
+      ring2State = false;
+    } else {
+      // wipe with purple
+      ring2.setWipeEfx(aNicePurple,100 );
+      ring2State = true;
+    }
+  }
+```
 
