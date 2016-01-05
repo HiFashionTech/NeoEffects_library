@@ -470,7 +470,7 @@ void NeoWindow::fadeEfxUpdate(void)
 
     // faded all the way out?
     if (fadeCurR == fadeFromR && fadeCurG == fadeFromG && fadeCurB == fadeFromB) {
-      Serial.println("FadeEfx: cycled all the way out; fade in");
+      printId(); Serial.println("FadeEfx: cycled all the way out; fade in");
       fadePhase = fadeFadeIn;
       fadeEfxEndCheck();
     }
