@@ -443,7 +443,6 @@ void NeoWindow::fadeEfxUpdate(void)
 
     // faded all the way in? are we cycling?
     if (fadeCurR == fadeToR && fadeCurG == fadeToG && fadeCurB == fadeToB) {
-      fadeEfxEndCheck();
       switch (fadeType) {
         case fadeTypeCycle:
           printId(); Serial.println("FadeEfx: cycled all the way in; fade out");
@@ -483,7 +482,7 @@ void NeoWindow::fadeEfxUpdate(void)
 void NeoWindow::fadeEfxEndCheck()
 {
     effectCount++;
-  if (fadeMaxCount > 0 && effectCount > fadeMaxCount)
+  if (effectCount > fadeMaxCount)
   {
     efxDone = true;
   }
