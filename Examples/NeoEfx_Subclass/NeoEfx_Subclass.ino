@@ -4,11 +4,11 @@
 */
 
 #include <Adafruit_NeoPixel.h>
-#include <NeoEffects.h>
+#include "NeoEffects.h"
 #include "NeoRainbowEfx.h"
 
 //////////////////////////////////////////
-#define SMALL_NEORING_SIZE 12
+#define SMALL_NEORING_SIZE 16
 
 #define STRIP_1_PIN 2
 
@@ -42,7 +42,7 @@ void setup() {
   Serial.begin(115200);
   delay(500); // delay a bit when we start so we can open arduino serial monitor window
   
-  Serial.println("Starting NeoEffects Example2");
+  Serial.println("Starting NeoEffects Subclass Rainbow Example");
 
   // start the strip.  do this first for all strips
   strip1.begin();
@@ -55,18 +55,53 @@ void setup() {
   blinkWholeStrip();
 
   ring1.setWipeEfx(strip1.randomColor(),100 ); // wipe on a random color
-  ring2.setRainbowEfx( 100 );
+  ring2.setRainbowEfx( 100, 0 );
 
 }
 
+int stateOne = 0;  // update to change ring1 effects
+int stateTwo = 0;
 
 void loop() {
   // grab the current time in class method
   NeoWindow::updateTime();
 
   // Simple wipe completed? chose another random color
-  if (ring1.effectDone())
-    ring1.setWipeEfx(strip1.randomColor(),100 );
+  if (ring1.effectDone()) {
+    stateOne++;
+    switch (stateOne) {
+      case 1:
+        Serial.println("Ring1 Sparkle");
+        ring1.setSparkleEfx(strip1.randomColor(),  50,  50, 100);
+        break;
+      case 2:
+        Serial.println("Ring1 Fade");
+        ring1.setFadeEfx(0, strip1.randomColor(), 100, ring1.fadeTypeCycle, 0); // fade between two colors
+        break;
+      case 3:
+        Serial.println("Ring1 Circle");
+        ring1.setCircleEfx(strip1.randomColor(), 200);
+        break;
+     default:
+        Serial.println("Ring1 WipeEfx");
+        stateOne = 0;
+        ring1.setWipeEfx(strip1.randomColor(),100 );
+    }
+  }
+  if (ring2.effectDone()) {
+    if (stateTwo == 0) { 
+      ring2.setRainbowEfx( 100, 1 );
+      stateTwo = 1;
+    } else {
+      ring2.setRainbowEfx( 100, 0 );
+      stateTwo = 0;
+    }
+  Serial.print("Rainbow State ");Serial.println(stateTwo);
+  }
+  
+  if (ring2.getEffectCount() > 10) {
+    ring2.setRainbowEfx( 100, 1 );
+  }
 
     // now update each Window - does one 'frame' of effect on the window
   ring1.updateWindow();
