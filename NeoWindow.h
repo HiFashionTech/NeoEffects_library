@@ -10,7 +10,7 @@
 #include <AdaFruit_NeoPixel.h>
 
 // and our NeoStrip object that encapsulates the Pixel
-#include <NeoStrip.h>
+#include "NeoStrip.h"
 
 class NeoWindow 
 {
@@ -34,6 +34,7 @@ public:
 
   void updateWindow(void); // invoke the current effect function
   boolean effectDone(void) {return efxDone;}
+  int getEffectCount(void) {return effectCount;}
   
   void printId(void);
   void printData(void);
@@ -56,6 +57,7 @@ protected:
   uint16_t myEndPixel;    // absolute index of last pixel in this window
 
   boolean efxDone;  // set when current effect is complete, if ever
+  uint16_t effectCount;
 
   uint32_t lastTime; // the last time current effect updated
   uint32_t effectDelay; // delay between updates of current effect
@@ -75,7 +77,7 @@ protected:
 //  void setRainbowEfx(uint32_t delayTime);
 
 public:
-  void setNoEfx();  // ignore this window
+  void setNoEfx();  // ignore this window, resets all counters, timers, etc
   void setHoldEfx(int delayTime); // hold current colors for delayTime
 private:
   void holdUpdateEfx(void);
@@ -108,7 +110,6 @@ private:
   uint32_t blink_color;
   boolean blink_state;
   int blink_maxCount;
-  int blink_step;
 
 public:
   void setSparkleEfx(uint32_t color, int flashTime, int tweenTime, int count = 0);
@@ -118,7 +119,6 @@ private:
   int sparkleFlashTime;
   int sparkleTweenTime;
   int sparkleMaxCount;
-  int sparkleCount;
   int sparkleCurPixel;
   int sparkleState;
 
@@ -131,7 +131,6 @@ private:
   int multiSparkleFlashTime;
   int multiSparkleTweenTime;
   int multiSparkleMaxCount;
-  int multiSparkleCount;
   int multiSparkleNumActive;
   int multiSparkleState;
 
@@ -149,7 +148,6 @@ private:
   
   int fadeType;
   int fadeMaxCount;
-  int fadeCount;
   // internally we use seperate RGB values
   int fadeFromR;
   int fadeFromG;

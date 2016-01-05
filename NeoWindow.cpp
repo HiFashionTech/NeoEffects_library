@@ -20,14 +20,8 @@ NeoWindow::NeoWindow(NeoStrip *strip, int startPixel, int len)
   myStartPixel = startPixel;
   myPixelCount = len;
   myEndPixel = myStartPixel + myPixelCount-1;
-  efxDone = false;
-
-  lastTime = 0;
-//  diffTime = 0;
-
-//  currentEffect = -1; // id of current effect
-  effectDelay = 0; // delay between updates of current effect
-  curUpdateFunc = NULL;
+    
+    setNoEfx(); // this does rest of setup
 }
 
 void NeoWindow::printId(void)
@@ -83,6 +77,7 @@ void NeoWindow::fillBlack()
 {
     fillColor(0);
 }
+
 ////////////////////////////////
 // Effects here
 void NeoWindow::setNoEfx()
@@ -90,27 +85,30 @@ void NeoWindow::setNoEfx()
   efxDone = false;
   effectDelay = 0;
   curUpdateFunc = NULL;
+  effectCount = 0;
+  lastTime = 0;
 }
 
 void NeoWindow::setHoldEfx(int delayTime)
 {
 //  printId(); Serial.println("    set to use hold effect");
-  efxDone = false;
-  effectDelay = delayTime;
+    setNoEfx();
+    effectDelay = delayTime;
   curUpdateFunc = &NeoWindow::holdUpdateEfx;
 }
 
 void NeoWindow::holdUpdateEfx(void) 
 {
   // once we are called the hold time has passed so mark us as done
-  efxDone = true;  
+  efxDone = true;
+    effectCount++;
 }
 
 ///////////////
 void NeoWindow::setCircleEfx(uint32_t color, uint32_t delayTime)
 {
 //  printId(); Serial.println("    set to use circle effect");
-  efxDone = false;
+    setNoEfx(); // reset values
   effectDelay = delayTime;
   curUpdateFunc = &NeoWindow::circleUpdateEfx;
   
@@ -141,6 +139,7 @@ void NeoWindow::circleUpdateEfx(void)
   if (circle_cursor > myEndPixel) { 
      circle_cursor = myStartPixel;
      efxDone = true; // if we dont check, it just continues
+      effectCount++;
 //     Serial.println(" wrapped circle");
   }
   myStrip->setPixelColor(circle_cursor, circle_color);
@@ -149,8 +148,9 @@ void NeoWindow::circleUpdateEfx(void)
 void NeoWindow::setWipeEfx(uint32_t color, uint32_t delayTime) // Wipe color once around window
 {
 //  printId(); Serial.println("    set to use wipe effect");
-  efxDone = false;
-  effectDelay = delayTime;  
+    setNoEfx(); // reset values
+
+    effectDelay = delayTime;
   curUpdateFunc = &NeoWindow::wipeUpdateEfx;
   
   // starting a Circle Effect using color and time
@@ -175,6 +175,7 @@ void NeoWindow::wipeUpdateEfx(void)
   if (wipe_cursor > myEndPixel) { 
      efxDone = true;
      wipe_cursor = myStartPixel;
+      
   }
 }
 
@@ -197,8 +198,9 @@ void NeoWindow::wipeUpdateEfx(void)
 void NeoWindow::setRandomWipeEfx(uint32_t color1, uint32_t color2, uint32_t delayTime) // Wipe color once around window
 {
 //  printId(); Serial.println("    set to use wipe effect");
-  efxDone = false;
-  effectDelay = delayTime;  
+    setNoEfx(); // reset values
+    
+  effectDelay = delayTime;
   curUpdateFunc = &NeoWindow::randomWipeUpdateEfx;
   
   // starting a Circle Effect using color and time
@@ -233,7 +235,8 @@ void NeoWindow::randomWipeUpdateEfx(void)
 void NeoWindow::setBlinkEfx(uint32_t color, uint32_t delayTime, int count)
 {
   // set the instance stuff
-  efxDone = false;
+    setNoEfx(); // reset values
+    
   effectDelay = delayTime;
   curUpdateFunc = &NeoWindow::blinkUpdateEfx;
 
@@ -241,7 +244,7 @@ void NeoWindow::setBlinkEfx(uint32_t color, uint32_t delayTime, int count)
   blink_color = color;
   blink_state = false;
   blink_maxCount = count;
-  blink_step = 0;
+    effectCount++;
   
   blinkUpdateEfx();
 
@@ -256,10 +259,10 @@ void NeoWindow::blinkUpdateEfx()
   } else {
       fillBlack();
       blink_state = true;
-      blink_step++;
+      effectCount++;
   }
   
-  if (blink_maxCount > 0 && blink_step > blink_maxCount)
+  if (blink_maxCount > 0 && effectCount > blink_maxCount)
     efxDone = true;
 }
 
@@ -269,7 +272,8 @@ static const int sparkleTWEEN = 0;
 
 void NeoWindow::setSparkleEfx(uint32_t color, int flashTime, int tweenTime, int count)
 {
-  efxDone = false;
+    setNoEfx(); // reset values
+    
   effectDelay = flashTime;
   curUpdateFunc = &NeoWindow::sparkleEfxUpdate;
 
@@ -277,7 +281,6 @@ void NeoWindow::setSparkleEfx(uint32_t color, int flashTime, int tweenTime, int 
   sparkleFlashTime = flashTime;
   sparkleTweenTime = tweenTime;
   sparkleMaxCount = count;
-  sparkleCount = 0;
   sparkleState = sparkleFLASH;
   sparkleCurPixel= random(myStartPixel, myEndPixel);
   fillBlack(); // clear it
@@ -302,8 +305,8 @@ void NeoWindow::sparkleEfxUpdate(void)
     effectDelay = sparkleFlashTime;
   }
 
-  sparkleCount++;
-  if (sparkleMaxCount > 0 && sparkleCount > sparkleMaxCount)
+    effectCount++;
+  if (sparkleMaxCount > 0 && effectCount > sparkleMaxCount)
   {
     efxDone = true;
   }
@@ -317,7 +320,8 @@ void NeoWindow::clearActive(void)
 
 void NeoWindow::setMultiSparkleEfx(uint32_t color, int flashTime, int tweenTime, int numActive, int count)
 {
-  efxDone = false;
+    setNoEfx(); // reset values
+    
   effectDelay = flashTime;
   curUpdateFunc = &NeoWindow::multiSparkleEfxUpdate;
 
@@ -326,7 +330,6 @@ void NeoWindow::setMultiSparkleEfx(uint32_t color, int flashTime, int tweenTime,
   multiSparkleTweenTime = tweenTime;
   multiSparkleMaxCount = count;
   multiSparkleNumActive = numActive;
-  multiSparkleCount = 0;
   multiSparkleState = sparkleFLASH;
   
   if (numActive == 0 || numActive > myPixelCount)
@@ -379,8 +382,8 @@ void NeoWindow::multiSparkleEfxUpdate(void)
     effectDelay = multiSparkleFlashTime;
   }
 
-  multiSparkleCount++;
-  if (multiSparkleMaxCount > 0 && multiSparkleCount > multiSparkleMaxCount)
+    effectCount++;
+  if (multiSparkleMaxCount > 0 && effectCount > multiSparkleMaxCount)
   {
     efxDone = true;
   }
@@ -399,7 +402,8 @@ static const int fadeFadeOut = 1;
 
 void NeoWindow::setFadeEfx(uint32_t fromColor, uint32_t toColor, int fadeTime, int type, int count)
 {
-  efxDone = false;
+    setNoEfx(); // reset values
+    
   effectDelay = fadeTime;
   curUpdateFunc = &NeoWindow::fadeEfxUpdate;
 
@@ -475,10 +479,11 @@ void NeoWindow::fadeEfxUpdate(void)
    fillColor(myStrip->Color(fadeCurR, fadeCurG, fadeCurB));
  
 }
+
 void NeoWindow::fadeEfxEndCheck()
 {
-  fadeCount++;
-  if (fadeMaxCount > 0 && fadeCount > fadeMaxCount)
+    effectCount++;
+  if (fadeMaxCount > 0 && effectCount > fadeMaxCount)
   {
     efxDone = true;
   }
