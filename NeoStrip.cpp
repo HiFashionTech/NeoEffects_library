@@ -109,6 +109,12 @@ uint32_t NeoStrip::randomColor(uint32_t fromColor, uint32_t toColor)
   return Adafruit_NeoPixel::Color(random(fromR,toR), random(fromG,toG),random(fromB,toB));
 }
 
+uint32_t NeoStrip::randomWheelColor(void)
+{
+    return colorWheel(random(0,255));
+}
+
+
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t NeoStrip::colorWheel(byte WheelPos) {

@@ -1,9 +1,14 @@
 // NeoWindow
+/** @file NeoWindow.cpp
+ @brief Implements the NeoWindow class of NeoEfx library - providing concurrent effects on NeoPixels
+ @author jerry isdale
+ */
+
 #include "NeoStrip.h"
 #include "NeoWindow.h"
 
 //////
-// used to invoke the member function pointer...
+// to invoke the member function pointer...
 //#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 
 // Class Variable definitions:
@@ -318,6 +323,12 @@ void NeoWindow::clearActive(void)
     myStrip->setPixelInactive(i);
 }
 
+/*! \brief setMultiSparkEfx: N randomly selected pixels in window flash on/off in selected color
+ *  flashTime is time pixels are ON; Tween Time is time the are off
+ *  when tweenTime is up, new pixels are chosen
+ *  when there have been count flashes, the effect is set to Done.
+ *
+ */
 void NeoWindow::setMultiSparkleEfx(uint32_t color, int flashTime, int tweenTime, int numActive, int count)
 {
     setNoEfx(); // reset values
@@ -332,7 +343,7 @@ void NeoWindow::setMultiSparkleEfx(uint32_t color, int flashTime, int tweenTime,
   multiSparkleNumActive = numActive;
   multiSparkleState = sparkleFLASH;
   
-  if (numActive == 0 || numActive > myPixelCount)
+  if (numActive <= 0 || numActive > myPixelCount)
     numActive = myPixelCount;
   multiSparkleNumActive = numActive;
 
@@ -350,13 +361,22 @@ void NeoWindow::multiSparkleEfxSelectPixels()
 {
 //  Serial.println("multiSparkleEfxSelectPixels");
   
-    for (int i = 0; i < multiSparkleNumActive; i++){
-      int idx = random(myStartPixel,myEndPixel);
-      while (myStrip->isPixelActive(idx))
-        idx = random(myStartPixel,myEndPixel);
-//      Serial.print("Set Pixel Active: "); Serial.print(idx);Serial.println();
-      myStrip->setPixelActive(idx);
-      myStrip->setPixelColor(idx,multiSparkleColor);
+    if (multiSparkleNumActive == 0 || multiSparkleNumActive == myPixelCount) {
+        // do all pixels in window; skip random choice so it runs fast
+        for (int idx=myStartPixel; idx<= myEndPixel; idx++) {
+            myStrip->setPixelActive(idx);
+            myStrip->setPixelColor(idx,multiSparkleColor);
+        }
+    } else {
+        for (int i = 0; i < multiSparkleNumActive; i++){
+          int idx = random(myStartPixel,myEndPixel);
+          while (myStrip->isPixelActive(idx))
+              // if it is already active, pick another; note this could take a while to fill large number
+              idx = random(myStartPixel,myEndPixel);
+    //      Serial.print("Set Pixel Active: "); Serial.print(idx);Serial.println();
+          myStrip->setPixelActive(idx);
+          myStrip->setPixelColor(idx,multiSparkleColor);
+        }
   }
 }
 
@@ -396,7 +416,11 @@ void NeoWindow::multiSparkleEfxUpdate(void)
 
 ////////////////////
 // Fade = linear fade between two colors, cycle makes if fade back
-// fade Phase
+// linear fade in rgb space looks odd if not to black
+//  better to fade in hsv or hcl
+//  http://www.alanzucconi.com/2016/01/06/colour-interpolation/
+//  but compute is expensive. might be better to precompute
+//
 static const int fadeFadeIn = 0;
 static const int fadeFadeOut = 1;
 
@@ -486,5 +510,44 @@ void NeoWindow::fadeEfxEndCheck()
   {
     efxDone = true;
   }
+}
+
+
+
+void NeoWindow:: setRainbowEfx(uint16_t waitTime, int type)
+{
+    // members common to all effects
+    setNoEfx();// reset counters
+    effectDelay = waitTime;
+    // effect specfic members
+    curColor = 0;
+    rainbowType = type;
+    
+    // and set the update function - magic of function poiners
+    curUpdateFunc = &NeoWindow::rainbowEfxUpdate;
+}
+
+void NeoWindow::rainbowEfxUpdate(void)
+{
+    // put a color in each pixel of window, depending on type
+    for (int i=0; i < myPixelCount; i++)
+    {
+        // colorWheel has 255 colors, from Adafruit NeoPixel strandtest example
+        if (rainbowType == 0) {
+            myStrip->setPixelColor(i+myStartPixel, NeoStrip::colorWheel((i+curColor) & 255));
+        } else {
+            myStrip->setPixelColor(i+myStartPixel, NeoStrip::colorWheel(((i*256/myPixelCount)+curColor) & 255));
+        }
+    }
+    
+    curColor++;
+    if (curColor > 255)
+    {
+        // reached end of colors, mark effect done
+        effectCount++;
+        efxDone = true;
+        // and set color index back to start so we can keep cycling
+        curColor = 0;
+    }
 }
 

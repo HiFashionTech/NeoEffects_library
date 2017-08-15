@@ -1,11 +1,12 @@
 /* 
  * NeoEfx_Subclass - example showing how to create a subclass of NeoWindow to add new Effect
- *  
+ *  editor notes: while developing this, changes cant be saved back into the live
+ *  Examples folder. So save to regular area and then copy back to Examples
 */
 
 #include <Adafruit_NeoPixel.h>
 #include "NeoEffects.h"
-#include "NeoRainbowEfx.h"
+#include "NeoSubclassWindow.h"
 
 //////////////////////////////////////////
 #define NEORING_SIZE 16
@@ -27,9 +28,9 @@ const int numRings = 3;
 
 NeoStrip strip1 = NeoStrip(NEORING_SIZE * numRings, STRIP_1_PIN, NEO_GRB + NEO_KHZ800);
 
-// first ring is same as BasicUse example
-NeoRainbowEfx ring1 = NeoRainbowEfx(&strip1, RING_1_START, NEORING_SIZE);
-NeoRainbowEfx ring2 = NeoRainbowEfx(&strip1, RING_2_START, NEORING_SIZE);
+// ring1 & ring2 use subclass ring3 is same as BasicUse example
+NeoSubclassWindow ring1 = NeoSubclassWindow(&strip1, RING_1_START, NEORING_SIZE);
+NeoSubclassWindow ring2 = NeoSubclassWindow(&strip1, RING_2_START, NEORING_SIZE);
 NeoWindow     ring3 = NeoWindow(&strip1, RING_3_START, NEORING_SIZE);
 
 const uint32_t aNicePurple = strip1.Color(128, 0, 50);

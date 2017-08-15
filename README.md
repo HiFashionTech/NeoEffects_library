@@ -10,7 +10,7 @@ The Adafruit NeoPixel Library example code, relies on the delay() function. This
 This library was created to simplify the use of the millis() technique on NeoPixel elements.
 
 # Library Design
-The Library provides two classes: NeoStrip and NeoWindow
+The Library provides two classes: NeoStrip and NeoWindow. NeoStrip represents all neoPixels connected to a single pin. Multiple neoPixel devices (rings, strips, etc) may be daisy chained off this pin. NeoWindow are (overlapping, non-exclusive) subsets of a NeoStrip that support independent effects. Developers can add their own effects by subclassing NeoWindow.
 
 ## NeoStrip Class
 NeoStrip is a subclass of the Adafruit NeoPixel. The primary addition is a boolean to determine if the strip's memory buffer has been chnaged. If it has, then the buffer should be written using show(), otherwise the show() can be skipped.  Note that at present (v0.x) the NeoStrip does NOT override the pixel set functions and relies on higher level calls to setStripChanged(). This is to avoid overhead of lots of calls to set the boolean when changing a range of pixels.
@@ -26,6 +26,8 @@ There are a pair of class method, updateTime() and currentTime(), that are used 
 
 The programmer uses one of the setXXXEffect() methods to set the current effect for a window. This may be done in setup() or during loop in response to a change in inputs or other states.  An effect may run for a period and then complete, in which case it sets an internal Done flag, which can be checked with `effectDone()`.  Programmers can add new effects by subclassing NeoWindow.
 
+Developers who desire to add their own effects will need to subclass the NeoWindow class.  Multiple new effects can be added in a subclass (which can also call efx in parent class)
+
 ## Effects Defined by NeoWindow
 
 Currently NeoWindow defines the following effects:
@@ -37,12 +39,21 @@ Currently NeoWindow defines the following effects:
 - Blink : blink all pixels in window on/off with specified color, rate and number blinks
 - Sparkle : blink a random pixel in window with color (on/off time) then chose new pixel
 - MultiSparkle : blink N random pixels in window on/off
-- Fade : linear fade between two colors (once, cycling in/out, or jumping back to start)
+- Fade : linear RGB interpolation between two colors (once, cycling in/out, or jumping back to start), note that linear interpolation of RGB may not look correct.
+- Rainbow : ripples a rainbow of color thru window, (255 steps, or size of window)
 
 See the NeoWindow.h file for parameters used when starting these effects.
 
 # Basic Use of NeoEffects
-There are a few basic steps to use the NeoEffects (see *Examples/NeoEfx_BasicUse*).  First the entire strip needs to be declared/defined, exactly as you would do for a NeoPixel. Then you need to declare/define the NeoWindows giving their start pixel number and size...
+There are a few basic steps to use the NeoEffects (see *Examples/NeoEfx_BasicUse*). 
+- First the entire strip needs to be declared/defined, exactly as you would do for a NeoPixel. Then you need to declare/define the NeoWindows giving their start pixel number and size... 
+- Then in setup() do some initialization and optionally start the initial efx. (eg. blink everything to say I'm Here!')
+- Then the magic happens in loop(). At top of loop(), grab the current time, Update Effects, 
+- Lastly the application shows the strip.  The strip has internal logic that knows if it has been modified or not.  If no mods happened, then it doesnt need to show..
+- The Update Effects is generally done as a 'State Machine'. Your application has some global variables that hold the CurrentState, and based on various inputs, time or whatever, it updates the CurrentState and the effects running on various NeoWindow.
+    
+Because there are no delay() used, the application can check buttons, serial and radio, networks, etc. No need to use interrupts, etc.  Hopefully we can get some examples up here to show this.
+
 
 ```
 // The strip is on arduino pin 1
@@ -72,6 +83,7 @@ NeoWindow ring1 = NeoWindow(&strip1, RING_1_START, SMALL_NEORING_SIZE);
 NeoWindow ring2 = NeoWindow(&strip1, RING_2_START, SMALL_NEORING_SIZE);
 NeoWindow ring3 = NeoWindow(&strip1, RING_3_START, SMALL_NEORING_SIZE);
 NeoWindow ring4 = NeoWindow(&strip1, RING_4_START, SMALL_NEORING_SIZE);
+
 ```
 Then in the setup() method we need to initialize the strip. Optionally we may wish to start effects on the windows.
 ```
@@ -115,6 +127,7 @@ void loop()
 Programmers can add their own effects by subclassing NeoWindow and providing a set and update function for each effect (as well as any supporting variables.  The *Examples/NeoEfx_Subclass* sketch shows how to implement the classic (overused) cycling rainbow effect.  A special programming 'trick' (function pointers) is used to hide details of updating. Function pointers can be tricky and perhaps hard to understand, but they are actually one of the more powerful parts of C and C++.
 
 The public setXXX() method will initialize the effect variables and set the initial colors. It also sets the private member function pointer curUpdateFunc to the update function of the current effect.  Then when the updateWindow() method is called in loop() this updateXXX() function is called (but only if the current timer indicates such).
+
 
 ```
 void NeoRainbowEfx:: setRainbowEfx(uint16_t waitTime)
