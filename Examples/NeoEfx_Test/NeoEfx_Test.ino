@@ -10,8 +10,7 @@
 //////////////////////////////////////////
 #define INTENSITY 255      //for NeoPixels
 #define STRIP_SIZE 44
-#define TIP_SIZE 4
-#define WINDOW_SIZE (STRIP_SIZE - TIP_SIZE)
+#define WINDOW_SIZE STRIP_SIZE
 #define STRIP_1_PIN 13
 #define DEFAULT_DELAYTIME 100
 
@@ -25,12 +24,11 @@ YELLOW = Adafruit_NeoPixel::Color(INTENSITY, INTENSITY, 0),
 BROWN = Adafruit_NeoPixel::Color(165, 42, 0),
 ORANGE = Adafruit_NeoPixel::Color(INTENSITY, 128, 0);
 
-const int WIN_START = 1;
-const int TIP_START = (WIN_START + WINDOW_SIZE);
-const int numWindows = 2;
+const int WIN_START = 0;
+const int numWindows = 1;
+const int maxBrightness =255;
 
 int defaultEfxCount = 10;
-int poleNumber = 10; // id of the pole, used by tip flasher
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -44,12 +42,10 @@ NeoStrip strip1 = NeoStrip(STRIP_SIZE, STRIP_1_PIN, NEO_GRB + NEO_KHZ800);
 
 // window & window use subclass ring3 is same as BasicUse example
 NeoWindow window = NeoWindow(&strip1, WIN_START, WINDOW_SIZE);
-NeoWindow tip = NeoWindow(&strip1, TIP_START, TIP_SIZE);
 
 const uint32_t aNicePurple = strip1.Color(128, 0, 50);
 
 int StartWinState = 1; // a hack to skip N steps when testing
-int tipState = 0;
 int windowState = StartWinState;
 
 //////////////////////////////////////////
@@ -63,6 +59,7 @@ void setup() {
 
   // start the strip.  do this first for all strips
   strip1.begin();
+  strip1.setBrightness(maxBrightness/2); 
   NeoWindow::updateTime();
   window.printId();
 
@@ -113,22 +110,24 @@ void loop() {
       // 14 = rainbow even distrb
       // 15 = ?
       case 1:
-        Serial.println(" Solid BLUE hold 2 sec");
-        delayTime = 2000;
+        Serial.println(" Solid BLUE hold 5 sec");
+        delayTime = 5000;
         window.setSolidColorEfx(BLUE, delayTime);
         break;
       case 2:
       {
+        delayTime = 100;
         effectCount = 3;
         int tmpcolor = strip1.randomColor();
         Serial.print (" Circle fwd ");Serial.println(tmpcolor);
-        window.setCircleEfx(tmpcolor, delayTime, effectCount);
+        window.setCircleEfx(tmpcolor, delayTime, effectCount,0);
         break;
       }
       case 3:
         Serial.println(" Circle rev");
-         effectCount = 3;
-       window.setCircleEfx(strip1.randomColor(), delayTime, effectCount, 1);
+        delayTime = 100;
+        effectCount = 3;
+        window.setCircleEfx(strip1.randomColor(), delayTime, effectCount, 1);
         break;
      case 4:
         Serial.println(" WipeEfx");
@@ -210,7 +209,8 @@ void blinkWholeStrip(void)
   delay(1000);    
   strip1.fillStrip(aNicePurple);
   strip1.show();
-  delay(1000);
+  delay(5000); // hold 5 sec
+  delay(1000); // hold 1 sec
   strip1.clearStrip();
   strip1.show();
   delay(1000);

@@ -151,10 +151,12 @@ void NeoWindow::setCircleEfx(uint32_t color, uint32_t delayTime, int count, int 
     // setup the initial frame
     if (circle_direction == 0) {
         circle_cursor = myStartPixel;
-        for (int i=circle_cursor+1; i< myEndPixel; i++)
+        myStrip->setPixelColor(circle_cursor, circle_color); //set rest of window to black
+       for (int i=circle_cursor+1; i< myEndPixel; i++)
             myStrip->setPixelColor(i, 0); //set rest of window to black
     } else {
         circle_cursor = myEndPixel;
+        myStrip->setPixelColor(circle_cursor, circle_color); //set rest of window to black
         for (int i=circle_cursor-1; i >= myStartPixel; i--)
             myStrip->setPixelColor(i, 0); //set rest of window to black
     }
@@ -168,14 +170,14 @@ void NeoWindow::circleUpdateEfx(void)
 {
     // we assume the update function has determined if it is time to call me
     
-//      Serial.println("Updating Circle Effect");
-//      Serial.print("   circle_cursor: ");Serial.println(circle_cursor);
-    //  printData();
+      Serial.println("Updating Circle Effect");
+      Serial.print("   circle_cursor: ");Serial.println(circle_cursor);
+      //printData();
 
     // circle moves a single pixel of circle_color around the virtual circle of the window
     // clear the currentPixel
     myStrip->setPixelColor(circle_cursor, 0);
-    if (circle_direction ==0) {
+    if (circle_direction == 0) {
         circle_cursor++;
         if (circle_cursor > myEndPixel) {
             circle_cursor = myStartPixel;
@@ -190,9 +192,10 @@ void NeoWindow::circleUpdateEfx(void)
             Serial.println(" wrapped circle rev");
         }
     }
-    if (effectCount > effectMaxCount)
+    if (effectCount >= effectMaxCount) {
         efxDone = true;
-    myStrip->setPixelColor(circle_cursor, circle_color);
+    } else
+        myStrip->setPixelColor(circle_cursor, circle_color);
 }
 
 void NeoWindow::setWipeEfx(uint32_t color, uint32_t delayTime) // Wipe color once around window
