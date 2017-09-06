@@ -57,8 +57,11 @@ public:
      * helper functions dealing with Adafruit_NeoPixel::Color (32 bit color)
      */
     static uint32_t randomColor(void) {
-        return Adafruit_NeoPixel::Color(random(0,255),random(0,255),random(0,255));}
-    static uint32_t randomWheelColor(void);
+        return Adafruit_NeoPixel::Color(random(0,255),random(0,255),random(0,255));
+        }
+    static uint32_t randomWheelColor(void) {
+        return colorWheel(random(0,255));
+    }
     static uint32_t randomColor(uint32_t c1, uint32_t c2);
     static uint8_t getRed(uint32_t c) { return (uint8_t)(c >> 16);}
     static uint8_t getGreen(uint32_t c) { return (uint8_t)(c >>  8);}

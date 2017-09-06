@@ -55,6 +55,8 @@ public:
   void fillColor(uint32_t color);    /*<! fill window with given 32bit Adafruit_NeoPixel::Color */
   void fillBlack();     /*!< fill window with black == clear window */
 
+    void setBgColor(uint32_t color);
+    void fillBgColor();
   void clearActive(); /*!< clear Active flag for all pixels in my range */
 
 
@@ -76,10 +78,10 @@ protected:
     
   uint32_t lastTime; /*!< the last time current effect updated */
   uint32_t effectDelay; /*!< delay between updates of current effect */
-
+    uint32_t myBgColor; /*!< background color, usually black */
 public:
     uint32_t getLastTime() {return lastTime;} // access lastTime
-
+    int getNumPixels() {return (int) myPixelCount;}
 ////////////////////////////////////
 // Different effects go here
 // instance variables to support specific effects
@@ -124,7 +126,8 @@ public:
      * @param color an Adafruit_NeoPixel::Color to be used
      * @param delayTime time between pixel changes
      */
-  void setWipeEfx(uint32_t color, uint32_t delayTime); /*!< Wipe color once around window */
+  void setWipeEfx(uint32_t color, uint32_t delayTime, int count=1); /*!< Wipe color once around window */
+  void setReverseWipeEfx(uint32_t color, uint32_t delayTime, int count =1); /*!< Wipe color once around window */
     /**
      * @brief Random Wipe Effect fills NeoWindow, one pixel at step with random color in range
      * marked as Done after window is filled with colors
@@ -134,7 +137,6 @@ public:
      * could use WipeEfx with wipe_color = NeoStrip::randomColor(color1, color2);
      */
   void setRandomWipeEfx(uint32_t color1, uint32_t color2, uint32_t delayTime); /*!< Wipe color once around window */
-  void setReverseWipeEfx(uint32_t color, uint32_t delayTime); /*!< Wipe color once around window */
 private:
   // wipe once and then set Done
   void wipeUpdateEfx(void);

@@ -25,6 +25,7 @@ NeoWindow::NeoWindow(NeoStrip *strip, int startPixel, int len)
     myStartPixel = startPixel;
     myPixelCount = len;
     myEndPixel = myStartPixel + myPixelCount-1;
+    myBgColor = 0; // default is black = 0;
     
     setNoEfx(); // this does rest of setup
 }
@@ -87,7 +88,17 @@ void NeoWindow::fillColor(uint32_t color)
 
 void NeoWindow::fillBlack()
 {
+//    Serial.println("---fill Black")
     fillColor(0);
+}
+
+void NeoWindow::setBgColor(uint color) {
+    myBgColor = color;
+}
+
+void NeoWindow::fillBgColor(){
+    Serial.printf("--fillBgColor 0x%X\n",myBgColor);
+    fillColor(myBgColor);
 }
 
 ////////////////////////////////
@@ -141,7 +152,8 @@ void NeoWindow::setCircleEfx(uint32_t color, uint32_t delayTime, int count, int 
     effectDelay = delayTime;
     curUpdateFunc = &NeoWindow::circleUpdateEfx;
     
-    fillBlack();
+    //fillBlack();
+    fillBgColor();
     
     // starting a Circle Effect using color and time
     circle_color = color;
@@ -153,43 +165,44 @@ void NeoWindow::setCircleEfx(uint32_t color, uint32_t delayTime, int count, int 
         circle_cursor = myStartPixel;
         myStrip->setPixelColor(circle_cursor, circle_color); //set rest of window to black
        for (int i=circle_cursor+1; i< myEndPixel; i++)
-            myStrip->setPixelColor(i, 0); //set rest of window to black
+            myStrip->setPixelColor(i, myBgColor); //set rest of window to black
     } else {
         circle_cursor = myEndPixel;
         myStrip->setPixelColor(circle_cursor, circle_color); //set rest of window to black
         for (int i=circle_cursor-1; i >= myStartPixel; i--)
-            myStrip->setPixelColor(i, 0); //set rest of window to black
+            myStrip->setPixelColor(i, myBgColor); //set rest of window to black
     }
     myStrip->setPixelColor(circle_cursor, circle_color);
     
     myStrip->setStripChanged(); // mark the strip changed
-    Serial.println("setCircleEfx end");
+//    Serial.println("setCircleEfx end");
 }
 
 void NeoWindow::circleUpdateEfx(void)
 {
     // we assume the update function has determined if it is time to call me
     
-      Serial.println("Updating Circle Effect");
-      Serial.print("   circle_cursor: ");Serial.println(circle_cursor);
+//      Serial.println("Updating Circle Effect");
+//      Serial.print("   circle_cursor: ");Serial.println(circle_cursor);
       //printData();
 
     // circle moves a single pixel of circle_color around the virtual circle of the window
     // clear the currentPixel
-    myStrip->setPixelColor(circle_cursor, 0);
+    myStrip->setPixelColor(circle_cursor, myBgColor);
+    
     if (circle_direction == 0) {
         circle_cursor++;
         if (circle_cursor > myEndPixel) {
             circle_cursor = myStartPixel;
             effectCount++;
-            Serial.println(" wrapped circle fwd");
+//            Serial.println(" wrapped circle fwd");
         }
     } else {// direction ==1
         circle_cursor--;
         if (circle_cursor < myStartPixel) {
             circle_cursor = myEndPixel;
             effectCount++;
-            Serial.println(" wrapped circle rev");
+//            Serial.println(" wrapped circle rev");
         }
     }
     if (effectCount >= effectMaxCount) {
@@ -198,12 +211,13 @@ void NeoWindow::circleUpdateEfx(void)
         myStrip->setPixelColor(circle_cursor, circle_color);
 }
 
-void NeoWindow::setWipeEfx(uint32_t color, uint32_t delayTime) // Wipe color once around window
+void NeoWindow::setWipeEfx(uint32_t color, uint32_t delayTime, int count) // Wipe color once around window
 {
     //  printId(); Serial.println("    set to use wipe effect");
     setNoEfx(); // reset values
     
     effectDelay = delayTime;
+    effectMaxCount = count;
     curUpdateFunc = &NeoWindow::wipeUpdateEfx;
     
     // starting a Circle Effect using color and time
@@ -219,13 +233,14 @@ void NeoWindow::setWipeEfx(uint32_t color, uint32_t delayTime) // Wipe color onc
     myStrip->setStripChanged(); // mark the strip changed
 }
 
-void NeoWindow::setReverseWipeEfx(uint32_t color, uint32_t delayTime) // Wipe color once around window
+void NeoWindow::setReverseWipeEfx(uint32_t color, uint32_t delayTime, int count) // Wipe color once around window
 {
     //  printId(); Serial.println("    set to use wipe effect");
     setNoEfx(); // reset values
     
     effectDelay = delayTime;
     curUpdateFunc = &NeoWindow::wipeUpdateEfx;
+    effectMaxCount = count;
     
     // starting a Circle Effect using color and time
     wipe_color = color;
@@ -243,7 +258,7 @@ void NeoWindow::setReverseWipeEfx(uint32_t color, uint32_t delayTime) // Wipe co
 void NeoWindow::wipeUpdateEfx(void)
 {
     // wipe fills the window one pixel each update, then sets Done
-    
+    bool doneOne = false;
     myStrip->setPixelColor(wipe_cursor, wipe_color);
     if (wipe_direction == 0)
         wipe_cursor++;
@@ -251,11 +266,19 @@ void NeoWindow::wipeUpdateEfx(void)
         wipe_cursor--;
     
     if (wipe_cursor > myEndPixel) {
-        efxDone = true;
+        doneOne = true;
         wipe_cursor = myStartPixel;
     } else if (wipe_cursor < myStartPixel) {
-        efxDone = true;
+        doneOne = true;
         wipe_cursor = myEndPixel;
+    }
+    if (doneOne) {
+        effectCount++;
+        fillBgColor();
+        if (effectCount > effectMaxCount) {
+            efxDone = true;
+            effectCount = 0;
+        }
     }
 }
 
@@ -337,7 +360,8 @@ void NeoWindow::blinkUpdateEfx()
         fillColor(blink_color);
         blink_state = false;
     } else {
-        fillBlack();
+        //fillBlack();
+        fillBgColor();
         blink_state = true;
         effectCount++;
     }
@@ -363,7 +387,9 @@ void NeoWindow::setSparkleEfx(uint32_t color, int flashTime, int tweenTime, int 
     effectMaxCount = count;
     sparkleState = sparkleFLASH;
     sparkleCurPixel= random(myStartPixel, myEndPixel);
-    fillBlack(); // clear it
+    
+    //fillBlack();
+    fillBgColor();
     
     // now turn on just that pixel
     myStrip->setPixelColor(sparkleCurPixel,sparkleColor);
@@ -374,7 +400,7 @@ void NeoWindow::sparkleEfxUpdate(void)
 {
     if (sparkleState == sparkleFLASH) {
         // it is on, turn off and set to sparkleTWEEN
-        myStrip->setPixelColor(sparkleCurPixel, 0);
+        myStrip->setPixelColor(sparkleCurPixel, myBgColor);
         sparkleState = sparkleTWEEN;
         effectDelay = sparkleTweenTime;
     } else {
@@ -422,9 +448,9 @@ void NeoWindow::setMultiSparkleEfx(uint32_t color, int flashTime, int tweenTime,
         numActive = myPixelCount;
     multiSparkleNumActive = numActive;
     
-    
     clearActive();
-    fillBlack(); // clear it
+    //fillBlack();
+    fillBgColor();
     
     // Select N pixels, make them Active and set them to the color
     multiSparkleEfxSelectPixels();
@@ -464,7 +490,7 @@ void NeoWindow::multiSparkleEfxUpdate(void)
         // it is on, turn off and set to multiSparkleTWEEN
         for (int idx = myStartPixel; idx <= myEndPixel;idx++) {
             if (myStrip->isPixelActive(idx))
-                myStrip->setPixelColor(idx, 0);
+                myStrip->setPixelColor(idx, myBgColor);
         }
         clearActive();
         multiSparkleState = sparkleTWEEN;
@@ -502,8 +528,8 @@ static const int fadeFadeOut = 1;
 void NeoWindow::setFadeEfx(uint32_t fromColor, uint32_t toColor, int fadeTime, int type, int count)
 {
     setNoEfx(); // reset values
-    Serial.print("setFadeEfx from ");Serial.print(fromColor);
-    Serial.print(" to ");Serial.print(toColor);
+    Serial.print("setFadeEfx from ");Serial.print(fromColor,HEX);
+    Serial.print(" to ");Serial.print(toColor,HEX);
     Serial.print(" fadeTime ");Serial.print(fadeTime);
     Serial.print(" type ");Serial.print(type);
     Serial.print(" count ");Serial.print(count);
