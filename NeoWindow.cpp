@@ -92,7 +92,7 @@ void NeoWindow::fillBlack()
     fillColor(0);
 }
 
-void NeoWindow::setBgColor(uint color) {
+void NeoWindow::setBgColor(uint32_t color) {
     myBgColor = color;
 }
 
