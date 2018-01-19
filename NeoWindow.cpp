@@ -97,7 +97,7 @@ void NeoWindow::setBgColor(uint color) {
 }
 
 void NeoWindow::fillBgColor(){
-    Serial.printf("--fillBgColor 0x%X\n",myBgColor);
+    //Serial.printf("--fillBgColor 0x%X\n",myBgColor);
     fillColor(myBgColor);
 }
 
