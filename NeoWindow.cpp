@@ -189,6 +189,7 @@ void NeoWindow::circleUpdateEfx(void)
     // circle moves a single pixel of circle_color around the virtual circle of the window
     // clear the currentPixel
     myStrip->setPixelColor(circle_cursor, myBgColor);
+//fillBlack();
     
     if (circle_direction == 0) {
         circle_cursor++;
