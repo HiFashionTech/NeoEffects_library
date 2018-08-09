@@ -53,7 +53,7 @@ void NeoWindow::printData(void)
 void NeoWindow::updateWindow(void)
 {
     if (!curUpdateFunc) {
-            printId(); Serial.println("    No updateFunc");
+            //printId(); Serial.println("    No updateFunc");
         return; // no effect defined. quick return
     }
     
@@ -581,12 +581,12 @@ void NeoWindow::fadeEfxUpdate(void)
         if (fadeCurR == fadeToR && fadeCurG == fadeToG && fadeCurB == fadeToB) {
             switch (fadeType) {
                 case fadeTypeCycle:
-                    printId(); Serial.println("FadeEfx: cycled all the way in; fade out");
+                    //printId(); Serial.println("FadeEfx: cycled all the way in; fade out");
                     // faded all in, cycle out
                     fadePhase = fadeFadeOut;
                     break;
                 case fadeTypeJumpBack:
-                    printId(); Serial.println("FadeEfx: cycled all the way in; not cycle, jump back");
+                    //printId(); Serial.println("FadeEfx: cycled all the way in; not cycle, jump back");
                     fadeEfxEndCheck();
                     fillColor(fadeFromColor);
                     fadeCurR = fadeFromR;
@@ -607,7 +607,7 @@ void NeoWindow::fadeEfxUpdate(void)
         
         // faded all the way out?
         if (fadeCurR == fadeFromR && fadeCurG == fadeFromG && fadeCurB == fadeFromB) {
-            printId(); Serial.println("FadeEfx: cycled all the way out; fade in");
+            //printId(); Serial.println("FadeEfx: cycled all the way out; fade in");
             fadePhase = fadeFadeIn;
             fadeEfxEndCheck();
         }
