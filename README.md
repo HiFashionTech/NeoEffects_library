@@ -9,6 +9,10 @@ The Adafruit NeoPixel Library example code, relies on the delay() function. This
 
 This library was created to simplify the use of the millis() technique on NeoPixel elements.
 
+This library is a bit more complex (and functional) than the [Adafruit NeoPatterns](https://learn.adafruit.com/multi-tasking-the-arduino-part-3?view=all) or the DMA interrupt [Adafruit NeoPXL8](https://learn.adafruit.com/dma-driven-neopixels) or the [NeoPixelBus](https://github.com/Makuna/NeoPixelBus)
+
+https://learn.adafruit.com/dma-driven-neopixels)
+
 # Library Design
 The Library provides two classes: NeoStrip and NeoWindow
 

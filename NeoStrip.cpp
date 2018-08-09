@@ -59,10 +59,12 @@ void NeoStrip::show(void)
     return stripChanged;
  }
 
+// clear to background?
  void NeoStrip::clearStrip()
  {
-   for (int i=0;i < numPixels();i++)
-    setPixelColor(i, 0);
+   //for (int i=0;i < numPixels();i++)
+   // setPixelColor(i, 0);
+     clear(); // use internal function for memset, faster
 
     setStripChanged();
  }
@@ -84,10 +86,12 @@ void NeoStrip::setPixelActive(int idx)
 {
   pixelActive[idx] = true;
 }
+
 void NeoStrip::setPixelInactive(int idx)
 {
   pixelActive[idx] = false;
 }
+
 boolean NeoStrip::isPixelActive(int idx)
 {
   return pixelActive[idx];
@@ -123,3 +127,24 @@ uint32_t NeoStrip::colorWheel(byte WheelPos) {
    return Adafruit_NeoPixel::Color(WheelPos * 3, 255 - WheelPos * 3, 0);
   }
 }
+
+//
+uint8_t NeoStrip::getMaxIntensityUsed()
+{
+    uint8_t max = 0;
+    // uses getPixelColor() which is slow but deals with RGBW, and brightness
+    uint16_t pixelCount = numPixels();
+    for (uint16_t i = 0; i < pixelCount;i++)
+    {
+        uint32_t color = getPixelColor(i);
+        // unpack and check vs max
+        uint8_t c = (color >> 16) & 0xFF;
+        if (c > max) max = c;
+        c = (color >> 8) & 0xFF;
+        if (c > max) max = c;
+        c =  color & 0xFF;
+        if (c > max) max = c;
+    }
+    return max;
+}
+
