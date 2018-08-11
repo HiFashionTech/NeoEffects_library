@@ -18,7 +18,8 @@ NeoStrip::NeoStrip(uint16_t n, uint8_t p, uint8_t t)
   // allocate and initialize array of active flags
   // have this at Strip level vs Window to reduce #dynamic memory alloc
   pixelActive = new boolean[n];
-  for (int i=0; i<n; i++) pixelActive[i]=false;
+  for (int i=0; i<n; i++)
+      pixelActive[i]=false;
 }
 
 void NeoStrip::printId(void)

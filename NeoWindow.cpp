@@ -96,6 +96,11 @@ void NeoWindow::setBgColor(uint32_t color) {
     myBgColor = color;
 }
 
+uint32_t NeoWindow::getBgColor()
+{
+    return myBgColor;
+}
+
 void NeoWindow::fillBgColor(){
     //Serial.printf("--fillBgColor 0x%X\n",myBgColor);
     fillColor(myBgColor);
@@ -529,12 +534,12 @@ static const int fadeFadeOut = 1;
 void NeoWindow::setFadeEfx(uint32_t fromColor, uint32_t toColor, int fadeTime, int type, int count)
 {
     setNoEfx(); // reset values
-    Serial.print("setFadeEfx from ");Serial.print(fromColor,HEX);
-    Serial.print(" to ");Serial.print(toColor,HEX);
-    Serial.print(" fadeTime ");Serial.print(fadeTime);
-    Serial.print(" type ");Serial.print(type);
-    Serial.print(" count ");Serial.print(count);
-    Serial.println();
+//    Serial.print("setFadeEfx from ");Serial.print(fromColor,HEX);
+//    Serial.print(" to ");Serial.print(toColor,HEX);
+//    Serial.print(" fadeTime ");Serial.print(fadeTime);
+//    Serial.print(" type ");Serial.print(type);
+//    Serial.print(" count ");Serial.print(count);
+//    Serial.println();
     
     effectDelay = fadeTime;
     curUpdateFunc = &NeoWindow::fadeEfxUpdate;

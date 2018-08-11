@@ -46,8 +46,8 @@ public:
   void updateWindow(void); /*!< invoke the current effect update function */
   boolean effectDone(void) {return efxDone;}        /*<! current effect has completed designated run */
   int getEffectCount(void) {return effectCount;}    /*!< returns count length of current effect */
-    int getEffectMaxCount(void) { return effectMaxCount;}
-    void setEffectMaxCount(int count) {effectMaxCount = count;}
+  int getEffectMaxCount(void) { return effectMaxCount;}
+  void setEffectMaxCount(int count) {effectMaxCount = count;}
   
   void printId(void);   /*<! uses Serial.println to emit ID of this window */
   void printData(void);   /*<! uses Serial.println to emit debug data on window/effect */
@@ -55,10 +55,11 @@ public:
   void fillColor(uint32_t color);    /*<! fill window with given 32bit Adafruit_NeoPixel::Color */
   void fillBlack();     /*!< fill window with black == clear window */
 
-    void setBgColor(uint32_t color);
-    void fillBgColor();
+  void setBgColor(uint32_t color);
+  uint32_t getBgColor();
+  void fillBgColor();
   void clearActive(); /*!< clear Active flag for all pixels in my range */
-
+  
 
 // hidden Instance Functions
 protected:
@@ -78,7 +79,7 @@ protected:
     
   uint32_t lastTime; /*!< the last time current effect updated */
   uint32_t effectDelay; /*!< delay between updates of current effect */
-    uint32_t myBgColor; /*!< background color, usually black */
+  uint32_t myBgColor; /*!< background color, usually black */
 public:
     uint32_t getLastTime() {return lastTime;} // access lastTime
     int getNumPixels() {return (int) myPixelCount;}
