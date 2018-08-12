@@ -74,6 +74,10 @@ public:
     
     static const uint32_t White; /*!< quick common reference for full white color */
     static uint32_t colorWheel(byte WheelPos);  /*!< colorWheel defines 255 colors of full intensity */
+    // HueSaturationLightness to RGB
+    static uint32_t hsl(uint16_t ih, uint8_t is, uint8_t il); /*!< hsl creates a packed RGB value given Hue Saturation Lightness parameters */
+private:
+    static uint8_t hsl_convert(float c, float t1, float t2);
     
 };
 
