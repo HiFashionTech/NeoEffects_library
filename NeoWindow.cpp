@@ -434,7 +434,7 @@ void NeoWindow::clearActive(void)
  *  flashTime is time pixels are ON; Tween Time is time the are off
  *  when tweenTime is up, new pixels are chosen
  *  when there have been count flashes, the effect is set to Done.
- *
+ *  if color == 0, randomly select rainbow of colors
  */
 void NeoWindow::setMultiSparkleEfx(uint32_t color, int flashTime, int tweenTime, int numActive, int count)
 {
@@ -468,11 +468,15 @@ void NeoWindow::multiSparkleEfxSelectPixels()
 {
     //  Serial.println("multiSparkleEfxSelectPixels");
     
-    if (multiSparkleNumActive == 0 || multiSparkleNumActive == myPixelCount) {
+    if (multiSparkleNumActive == 0 || multiSparkleNumActive == myPixelCount)
+    {
         // do all pixels in window; skip random choice so it runs fast
         for (int idx=myStartPixel; idx<= myEndPixel; idx++) {
             myStrip->setPixelActive(idx);
-            myStrip->setPixelColor(idx,multiSparkleColor);
+            uint32_t color =multiSparkleColor;
+            if (color == 0)
+                color = NeoStrip::randomWheelColor();
+            myStrip->setPixelColor(idx,color);
         }
     } else {
         for (int i = 0; i < multiSparkleNumActive; i++){
@@ -482,7 +486,10 @@ void NeoWindow::multiSparkleEfxSelectPixels()
                 idx = random(myStartPixel,myEndPixel);
             //      Serial.print("Set Pixel Active: "); Serial.print(idx);Serial.println();
             myStrip->setPixelActive(idx);
-            myStrip->setPixelColor(idx,multiSparkleColor);
+            uint32_t color =multiSparkleColor;
+            if (color == 0)
+                color = NeoStrip::randomWheelColor();
+            myStrip->setPixelColor(idx,color);
         }
     }
 }
@@ -534,12 +541,12 @@ static const int fadeFadeOut = 1;
 void NeoWindow::setFadeEfx(uint32_t fromColor, uint32_t toColor, int fadeTime, int type, int count)
 {
     setNoEfx(); // reset values
-//    Serial.print("setFadeEfx from ");Serial.print(fromColor,HEX);
-//    Serial.print(" to ");Serial.print(toColor,HEX);
-//    Serial.print(" fadeTime ");Serial.print(fadeTime);
-//    Serial.print(" type ");Serial.print(type);
-//    Serial.print(" count ");Serial.print(count);
-//    Serial.println();
+    Serial.print("setFadeEfx from ");Serial.print(fromColor,HEX);
+    Serial.print(" to ");Serial.print(toColor,HEX);
+    Serial.print(" fadeTime ");Serial.print(fadeTime);
+    Serial.print(" type ");Serial.print(type);
+    Serial.print(" count ");Serial.print(count);
+    Serial.println();
     
     effectDelay = fadeTime;
     curUpdateFunc = &NeoWindow::fadeEfxUpdate;

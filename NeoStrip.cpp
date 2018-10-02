@@ -8,6 +8,7 @@
 
 int NeoStrip::s_nIDGenerator = 1;
 const uint32_t NeoStrip::White = Adafruit_NeoPixel::Color(255,255,255);
+const uint32_t NeoStrip::Black = Adafruit_NeoPixel::Color(0,0,0);
 
 // wrapper on Adafruit_NeoPixel constructor
 NeoStrip::NeoStrip(uint16_t n, uint8_t p, uint8_t t) 

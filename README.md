@@ -42,6 +42,8 @@ Currently NeoWindow defines the following effects:
 - Sparkle : blink a random pixel in window with color (on/off time) then chose new pixel
 - MultiSparkle : blink N random pixels in window on/off
 - Fade : linear fade between two colors (once, cycling in/out, or jumping back to start)
+- Morse: blinks out morse code string
+- Dazzle: all pixels blink random bright colors
 
 See the NeoWindow.h file for parameters used when starting these effects.
 

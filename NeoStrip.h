@@ -73,7 +73,10 @@ public:
     static uint8_t getBlue(uint32_t c) { return (uint8_t)c;}
     
     static const uint32_t White; /*!< quick common reference for full white color */
+    static const uint32_t Black; /*!< quick common reference for full black color */
+    
     static uint32_t colorWheel(byte WheelPos);  /*!< colorWheel defines 255 colors of full intensity */
+    
     // HueSaturationLightness to RGB
     static uint32_t hsl(uint16_t ih, uint8_t is, uint8_t il); /*!< hsl creates a packed RGB value given Hue Saturation Lightness parameters */
 private:

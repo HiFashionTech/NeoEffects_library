@@ -265,6 +265,7 @@ private:
     void rainbowEfxUpdate(void);
     int curRainbowColor;
     int rainbowType;
+    
 /*
 public:
     // Theatre Chase Theatre Chase Rainbow
@@ -274,6 +275,37 @@ private:
     void theatreChaseUpdate();
     void rainbowTheatreChaseUpdate();
  */
+    
+    ////// MorseCode
+public:
+    void setMorseEfx(uint32_t dotTime, uint32_t color, String msg, int repeatCount=1);
+private:
+    void morseEffectUpdate(void);
+    uint32_t morseColor;
+    uint32_t morseDotTime;
+    int morseRepeatCount;
+    int morseCurCodeIdx;
+    String morseCode;
+    int morseCodeLen;
+    enum morseState {sendDot, sendDash, sendOff, waitWord, tween} morseCurState;
+    void printMorseCurState(); // for debugging purposes
+    
+    /**
+     * @brief Dazzle Effect: rainbow sparkle effect
+     * NeoEffect that sparkles random rainbow of colors across window
+     * @param flashTime time delay tween changes
+     * @param probOff  probability pixel is changes state = 0-100
+     * @param count number of times to sparkle before marking effect DONE
+     */
+public:
+    void setDazzleEfx( int flashTime, int probOff, int count);
+    
+private:
+    void dazzleEfxUpdate(void);
+    int dazzleTimer;
+    int dazzleProbChange;
+    int dazzleMaxCount;
+
 };
 
 #endif
