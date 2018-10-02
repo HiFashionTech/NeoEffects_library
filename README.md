@@ -4,6 +4,8 @@ NeoEffects provides classes to support multiple concurrent effects on NeoPixel s
 It is based on the [Adafruit NeoPixel library](https://github.com/adafruit/Adafruit_NeoPixel).
 [NeoPixels](http://www.adafruit.com/search?q=NeoPixel) are the Adafruit name for RGB LED devices that contain the WS2812 controller. The libraries should work well with other WS2812 devices (strips, rings, arrays, etc.)
 
+Code includes DOxygen style documentation comments.
+
 ## Blink Without Delay()
 The Adafruit NeoPixel Library example code, relies on the delay() function. This holds up the CPU and precludes multiple simultaneous effects on the same or different strips.  There are several techniques to avoid delay(). The principle technique is to use millis() to check elapsed time (see the examples from arduino.cc:  [BlinkWithoutDelay](https://www.arduino.cc/en/Tutorial/BlinkWithoutDelay) and [AvoidDelay](http://playground.arduino.cc/Code/AvoidDelay) ).  
 

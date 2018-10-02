@@ -1,8 +1,5 @@
 // MorseEfx - NeoEffect for morse code
 // somewhat inspired by https://gist.github.com/madc/4474559
-// change the include NewWin_Test.h to your app's NeoWin
-// and copy the public/private parts to your class declaration
-// be sure the naming of class is the same
 
 // Note on Dot Time per Wikipedia
 //  https://en.wikipedia.org/wiki/Morse_code
