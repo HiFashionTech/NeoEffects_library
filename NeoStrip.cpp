@@ -150,3 +150,9 @@ uint8_t NeoStrip::getMaxIntensityUsed()
     return max;
 }
 
+boolean NeoStrip::hasWhiteLED()
+{
+    if (rOffset != wOffset)
+        return true;
+    return false;
+}

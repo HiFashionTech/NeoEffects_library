@@ -31,7 +31,7 @@ private:
 public:
     
     NeoStrip(uint16_t n, uint8_t p=6, uint8_t t=NEO_GRB + NEO_KHZ800);
-    
+    int getId() {return myId;} /*!< returns autogen'd id of this strip */
     void setStripChanged(); /*!< marks the strip as Changed */
     void clearStripChanged(); /*!< clears changed flag; strip shown only if changed */
     boolean getStripChanged(); /*!< access internal flag */
@@ -45,7 +45,7 @@ public:
     void show(void); /*!< if strip changed, invoke parent show, and clear stripChanged */
     
     uint8_t getMaxIntensityUsed(); /*!< returns maximum value across all rgb pixels */
-    
+    boolean hasWhiteLED(); /*!< true if strip is rgb+w (4 leds) */
     //////
     /**
      * Active Pixel booleans can be used by NeoWindows to determine if a particular pixel
