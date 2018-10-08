@@ -80,9 +80,11 @@ protected:
   uint32_t lastTime; /*!< the last time current effect updated */
   uint32_t effectDelay; /*!< delay between updates of current effect */
   uint32_t myBgColor; /*!< background color, usually black */
+    
 public:
-    uint32_t getLastTime() {return lastTime;} // access lastTime
-    int getNumPixels() {return (int) myPixelCount;}
+    uint32_t getLastTime() {return lastTime;} /*!< last Time window was updated */
+    int getNumPixels() {return (int) myPixelCount;} /*!< returns number pixels in window */
+    NeoStrip *getStrip() {return myStrip;} /*!< pointer to NeoStrip this belongs to */
 ////////////////////////////////////
 // Different effects go here
 // instance variables to support specific effects
@@ -137,11 +139,13 @@ public:
      * @param delayTime time between pixel changes
      * could use WipeEfx with wipe_color = NeoStrip::randomColor(color1, color2);
      */
-  void setRandomWipeEfx(uint32_t color1, uint32_t color2, uint32_t delayTime); /*!< Wipe color once around window */
+  void setRandomWipeEfx(uint32_t color1, uint32_t color2, uint32_t delayTime, int count = 1); /*!< Wipe color once around window */
 private:
   // wipe once and then set Done
   void wipeUpdateEfx(void);
   void randomWipeUpdateEfx(void);
+  bool wipeDoneOne;
+
   bool wipe_direction; // 0 = fwd, 1 = reverse
   uint32_t wipe_color; /*!< private member for color of wipe */
   int32_t wipe_cursor; /*!< private member for wipe postition */

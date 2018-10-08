@@ -120,7 +120,8 @@ void NeoWindow::setNoEfx()
 
 void NeoWindow::setHoldEfx(int delayTime)
 {
-    printId(); Serial.print("    set to use hold effect, delayMs: ");Serial.println(delayTime);
+    printId();
+    Serial.print("   set to use hold effect, delayMs ");Serial.println(delayTime);
     Serial.print("   currTime:");Serial.println(NeoWindow::currTime);
     setNoEfx();
     effectDelay = delayTime;
@@ -135,12 +136,14 @@ void NeoWindow::setSolidColorEfx(uint32_t color, int holdTime)
 
 void NeoWindow::holdUpdateEfx(void)
 {
-    Serial.print("hold Done currMillis:");Serial.println(NeoWindow::currTime);
+//    Serial.print("hold Done currMillis:");Serial.println(NeoWindow::currTime);
     // once we are called the hold time has passed so mark us as done
     if (lastTime != 0)
         efxDone = true;
     else
-        Serial.println("hold : lastTime is 0, need to run at least once");
+    {
+//        Serial.println("hold : lastTime is 0, need to run at least once");
+    }
     effectCount++;
 }
 
@@ -221,7 +224,8 @@ void NeoWindow::setWipeEfx(uint32_t color, uint32_t delayTime, int count) // Wip
 {
     //  printId(); Serial.println("    set to use wipe effect");
     setNoEfx(); // reset values
-    
+    wipeDoneOne = false;
+
     effectDelay = delayTime;
     effectMaxCount = count;
     curUpdateFunc = &NeoWindow::wipeUpdateEfx;
@@ -231,6 +235,7 @@ void NeoWindow::setWipeEfx(uint32_t color, uint32_t delayTime, int count) // Wip
     wipe_cursor = myStartPixel;
     wipe_direction = 0;// fwd
     
+    fillBgColor();
     myStrip->setPixelColor(wipe_cursor, wipe_color);
     // dont change rest of colors
     //  for (int i=circle_cursor+1; i< myEndPixel; i++)
@@ -243,7 +248,8 @@ void NeoWindow::setReverseWipeEfx(uint32_t color, uint32_t delayTime, int count)
 {
     //  printId(); Serial.println("    set to use wipe effect");
     setNoEfx(); // reset values
-    
+    wipeDoneOne = false;
+
     effectDelay = delayTime;
     curUpdateFunc = &NeoWindow::wipeUpdateEfx;
     effectMaxCount = count;
@@ -251,8 +257,9 @@ void NeoWindow::setReverseWipeEfx(uint32_t color, uint32_t delayTime, int count)
     // starting a Circle Effect using color and time
     wipe_color = color;
     wipe_cursor = myEndPixel;
-    wipe_direction = 1;// fwd
-    
+    wipe_direction = 1;// reverse
+    fillBgColor();
+
     myStrip->setPixelColor(wipe_cursor, wipe_color);
     // dont change rest of colors
     //  for (int i=circle_cursor+1; i< myEndPixel; i++)
@@ -261,27 +268,35 @@ void NeoWindow::setReverseWipeEfx(uint32_t color, uint32_t delayTime, int count)
     myStrip->setStripChanged(); // mark the strip changed
 }
 
+
 void NeoWindow::wipeUpdateEfx(void)
 {
+    bool wipeComplete = false;
     // wipe fills the window one pixel each update, then sets Done
-    bool doneOne = false;
-    myStrip->setPixelColor(wipe_cursor, wipe_color);
     if (wipe_direction == 0)
+    {
         wipe_cursor++;
-    else
+        if (wipe_cursor > myEndPixel)
+        {
+            wipeComplete = true;
+            wipe_cursor = myStartPixel;
+            fillBgColor();
+        }
+    } else
+    {
         wipe_cursor--;
-    
-    if (wipe_cursor > myEndPixel) {
-        doneOne = true;
-        wipe_cursor = myStartPixel;
-    } else if (wipe_cursor < myStartPixel) {
-        doneOne = true;
-        wipe_cursor = myEndPixel;
+        if (wipe_cursor < myStartPixel) {
+            wipeComplete = true;
+            wipe_cursor = myEndPixel;
+            fillBgColor();
+        }
     }
-    if (doneOne) {
+    myStrip->setPixelColor(wipe_cursor, wipe_color);
+
+    if (wipeComplete) {
         effectCount++;
-        fillBgColor();
-        if (effectCount > effectMaxCount) {
+        if (effectCount > effectMaxCount)
+        {
             efxDone = true;
             effectCount = 0;
         }
@@ -304,11 +319,13 @@ void NeoWindow::wipeUpdateEfx(void)
 //  return Adafruit_NeoPixel::Color(random(fromR,toR), random(fromG,toG),random(fromB,toB));
 //}
 
-void NeoWindow::setRandomWipeEfx(uint32_t color1, uint32_t color2, uint32_t delayTime) // Wipe color once around window
+void NeoWindow::setRandomWipeEfx(uint32_t color1, uint32_t color2, uint32_t delayTime, int count) // Wipe color once around window
 {
     //  printId(); Serial.println("    set to use random wipe effect");
     setNoEfx(); // reset values
-    
+    effectMaxCount = count;
+    wipeDoneOne = false;
+
     effectDelay = delayTime;
     curUpdateFunc = &NeoWindow::randomWipeUpdateEfx;
     
@@ -337,8 +354,17 @@ void NeoWindow::randomWipeUpdateEfx(void)
     if (wipe_cursor > myEndPixel) {
         wipe_cursor = myStartPixel;
         wipe_color = NeoStrip::randomColor(randomWipeColor1, randomWipeColor2);
-        efxDone = true;
+        wipeDoneOne = true;
     }
+    if (wipeDoneOne) {
+        effectCount++;
+        fillBgColor();
+        if (effectCount > effectMaxCount) {
+            efxDone = true;
+            effectCount = 0;
+        }
+    }
+
 }
 
 void NeoWindow::setBlinkEfx(uint32_t color, uint32_t delayTime, int count)
